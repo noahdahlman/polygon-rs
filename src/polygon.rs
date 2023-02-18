@@ -1,14 +1,13 @@
-#![feature(fs_try_exists)]
+use async_trait::async_trait;
 use eyre::Result;
 use reqwest::{self, StatusCode};
 use serde::{Deserialize, Serialize};
-use serde_json::{Value};
+use serde_json::Value;
 use std::error::Error;
 
 use url::Url;
 
 pub fn get_polygon_api_key() -> String {
-    
     std::env::var("POLYGON_API_KEY").expect("POLYGON_API_KEY must be set")
 }
 
@@ -40,20 +39,27 @@ pub struct ResponseObject<T> {
 const base_url: &str = "https://api.polygon.io/v3/";
 const tickers: &str = "reference/tickers";
 
-pub struct PolygonAPI {
+pub struct Polygon {
     api_key: String,
     client: reqwest::Client,
 }
 
-impl PolygonAPI {
-    pub async fn connect(api_key: String) -> PolygonAPI {
-        Self {
+#[async_trait]
+pub trait API<T> {
+    async fn connect(api_key: String) -> Result<T>;
+    async fn fetch(&self, url: Url) -> Result<ResponseObject<Value>>;
+}
+
+#[async_trait]
+impl API<Polygon> for Polygon {
+    async fn connect(api_key: String) -> Result<Polygon> {
+        Ok(Self {
             api_key,
             client: reqwest::Client::new(),
-        }
+        })
     }
 
-    pub async fn fetch(&self, url: Url) -> Result<ResponseObject<Value>> {
+    async fn fetch(&self, url: Url) -> Result<ResponseObject<Value>> {
         let response = self
             .client
             .get(url.clone())
@@ -70,14 +76,9 @@ impl PolygonAPI {
             )),
         }
     }
+}
 
-    // pub async fn save_fetch(&self, route: &str, filename: &str) -> Result<(), dyn Box<Error>> {
-    //     let response = fetch(route).await?;
-    //     std::fs
-    //     std::fs::write(filename, response)?;
-    //     Ok(())
-    // }
-
+impl Polygon {
     pub async fn markets(&self) -> Result<ResponseObject<Value>, Box<dyn Error>> {
         let url: Url = format!("{}{}?market=stocks&active=true", base_url, tickers).parse()?;
         let response = self.fetch(url).await?;
@@ -87,14 +88,14 @@ impl PolygonAPI {
 }
 
 mod test {
-    
-    
+    use super::*;
+    use dotenv::dotenv;
 
     #[tokio::test]
     async fn test_polygon_api() {
         dotenv().ok();
         let api_key = get_polygon_api_key();
-        let polygon = PolygonAPI::connect(api_key).await;
+        let polygon = Polygon::connect(api_key).await.unwrap();
         let response = polygon.markets().await.unwrap();
         assert_eq!(response.status, "OK");
     }
