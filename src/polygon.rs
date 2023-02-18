@@ -37,7 +37,9 @@ pub struct ResponseObject<T> {
 // }
 
 const base_url: &str = "https://api.polygon.io/v3/";
+const experimental_base_url: &str = "https://api.polygon.io/vX/";
 const tickers: &str = "reference/tickers";
+const financials: &str = "reference/financials";
 
 pub struct Polygon {
     api_key: String,
@@ -82,8 +84,20 @@ impl Polygon {
     pub async fn markets(&self) -> Result<ResponseObject<Value>, Box<dyn Error>> {
         let url: Url = format!("{}{}?market=stocks&active=true", base_url, tickers).parse()?;
         let response = self.fetch(url).await?;
-        println!("{:?}", response);
         Ok(response)
+    }
+    pub async fn financials(
+        &self,
+        symbol: String,
+    ) -> Result<ResponseObject<Value>, Box<dyn Error>> {
+        Ok(self
+            .fetch(match symbol.is_empty() {
+                true => format!("{}{}", experimental_base_url, financials).parse()?,
+                false => {
+                    format!("{}{}?ticker={}", experimental_base_url, financials, symbol).parse()?
+                }
+            })
+            .await?)
     }
 }
 
@@ -97,6 +111,17 @@ mod test {
         let api_key = get_polygon_api_key();
         let polygon = Polygon::connect(api_key).await.unwrap();
         let response = polygon.markets().await.unwrap();
+        assert_eq!(response.status, "OK");
+    }
+
+    #[tokio::test]
+    async fn test_polygon_financials() {
+        dotenv().ok();
+        let api_key = get_polygon_api_key();
+        let polygon = Polygon::connect(api_key).await.unwrap();
+        let aapl_response = polygon.financials("AAPL".to_string()).await.unwrap();
+        assert_eq!(aapl_response.status, "OK");
+        let response = polygon.financials("".to_string()).await.unwrap();
         assert_eq!(response.status, "OK");
     }
 }
