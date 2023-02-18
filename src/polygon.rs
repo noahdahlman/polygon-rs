@@ -2,14 +2,14 @@
 use eyre::Result;
 use reqwest::{self, StatusCode};
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
+use serde_json::{Value};
 use std::error::Error;
-use std::fs;
+
 use url::Url;
 
 pub fn get_polygon_api_key() -> String {
-    let key = std::env::var("POLYGON_API_KEY").expect("POLYGON_API_KEY must be set");
-    key
+    
+    std::env::var("POLYGON_API_KEY").expect("POLYGON_API_KEY must be set")
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -87,8 +87,8 @@ impl PolygonAPI {
 }
 
 mod test {
-    use super::*;
-    use dotenv::dotenv;
+    
+    
 
     #[tokio::test]
     async fn test_polygon_api() {
