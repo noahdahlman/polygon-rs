@@ -1,5 +1,5 @@
 mod polygon;
-use polygon::{Polygon, API};
+use polygon::api::{Polygon, API};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
