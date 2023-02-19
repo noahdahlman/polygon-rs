@@ -3,10 +3,10 @@ use super::constants::*;
 use async_trait::async_trait;
 use eyre::Result;
 use reqwest::{self, StatusCode};
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
+
+
 use std::env;
-use std::future;
+
 use std::sync::Arc;
 use url::Url;
 
@@ -67,7 +67,7 @@ impl Polygon {
         dotenv::dotenv().ok();
         env::var("POLYGON_API_KEY")
             .expect("Polygon API key not in env variables...")
-            .to_string()
+            
     }
 
     pub async fn markets(&self) -> Result<ResponseObject> {
@@ -76,12 +76,12 @@ impl Polygon {
         Ok(response)
     }
     pub async fn financials(&self, symbol: String) -> Result<ResponseObject> {
-        Ok(self
+        self
             .fetch(match symbol.is_empty() {
                 true => format!("{}{}", self.base_url, FINANCIALS).parse()?,
                 false => format!("{}{}?ticker={}", self.base_url, FINANCIALS, symbol).parse()?,
             })
-            .await?)
+            .await
     }
 }
 

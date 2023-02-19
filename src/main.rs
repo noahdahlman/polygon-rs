@@ -1,7 +1,7 @@
 mod polygon;
-use polygon::api::{Polygon, API};
-use polygon::common::ResponseObject;
-use serde::{Deserialize, Serialize};
+use polygon::api::{Polygon};
+
+
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
