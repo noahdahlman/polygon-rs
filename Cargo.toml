@@ -18,6 +18,7 @@ async-trait = "0.1.64"
 [dev-dependencies]
 criterion = "0.3"
 mockall = "0.11.3"
+mockito = "0.32.3"
 
 # [[bench]]
 # name = "polygon_bench"
