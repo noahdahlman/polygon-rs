@@ -1,4 +1,5 @@
-use super::common::*;
+
+use super::common::{ResponseObject, Ticker};
 use super::constants::*;
 use async_trait::async_trait;
 use eyre::Result;
@@ -101,11 +102,22 @@ mod test {
         let polygon = Polygon::new_with_base_url(url)
             .await
             .expect("Failed to create Polygon API");
+
         let response = polygon
             .markets()
             .await
             .expect("Failed to fetch markets....");
 
+        let ticker: Ticker = serde_json::from_value(response.results.first().unwrap().to_owned())
+            .expect("Failed to deserialize Ticker...");
+        assert_eq!(ticker.ticker, "A");
+        assert_eq!(ticker.name, "Agilent Technologies Inc.");
+        assert_eq!(ticker.market, "stocks");
+        assert_eq!(ticker.locale, "us");
+        assert_eq!(ticker.currency_name, "usd");
+        assert_eq!(ticker.active, true);
+        assert_eq!(ticker.primary_exchange, "XNYS");
+        assert_eq!(ticker.type_, "CS");
         assert_eq!(response.status, "OK");
 
         ticker_mock.assert_async().await;
