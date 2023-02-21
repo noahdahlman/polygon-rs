@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
-use std::{fs::File, io::Write};
+use std::fs::File;
+use std::io::Write;
+
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct ResponseObject {
@@ -8,6 +10,25 @@ pub struct ResponseObject {
     pub request_id: String,
     pub results: Vec<serde_json::Value>,
     pub status: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Ticker {
+    pub ticker: String,
+    pub name: String,
+    pub market: String,
+    pub locale: String,
+    pub currency_name: String,
+    pub active: bool,
+    pub cik: String,
+    pub primary_exchange: String,
+    pub share_class_figi: String,
+    pub composite_figi: String,
+    #[serde(rename = "type")]
+    pub type_: String,
+    //TODO: Figure out how to deserialize this
+    pub last_updated_utc: String,
+    pub delisted_utc: Option<String>,
 }
 
 impl Into<String> for ResponseObject {
